@@ -6,9 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
-import net.javacrumbs.jsonunit.core.Option;
+import model.country.CountryPagination;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -114,5 +113,50 @@ public class GetCountryTests {
             };
             assertThat(Float.parseFloat(country.get("gdp")), matcher);
         }
+    }
+    @Test
+    void verifyGetCountryApiWithPagination(){
+        int page = 1, size = 4;
+        //Verify first page
+        Response response = getCountries(page, size);
+        CountryPagination countryFirstPage = response.as(CountryPagination.class);
+        verifyCountriesResponse(response, countryFirstPage, size);
+
+        //Verify second page
+        response = getCountries(page + 1, size);
+        CountryPagination countrySecondPage = response.as(CountryPagination.class);
+        verifyCountriesResponse(response, countrySecondPage, size);
+        assertThat(countryFirstPage.getData().containsAll(countrySecondPage.getData()), is(false));
+
+        //Verify last page
+        int total = countryFirstPage.getTotal();
+        int lastPage = total/size;
+        if(total % size != 0){
+            lastPage++;
+        }
+        int sizeOfLastPage = total % size;
+        if (sizeOfLastPage == 0){
+            sizeOfLastPage = size;
+        }
+        response = getCountries(lastPage, size);
+        CountryPagination countryLastPage = response.as(CountryPagination.class);
+        verifyCountriesResponse(response, countryLastPage, sizeOfLastPage);
+    }
+
+    private static void verifyCountriesResponse(Response response, CountryPagination countryFirstPage, int size) {
+        //1. Verify status code
+        assertThat(response.statusCode(), equalTo(200));
+        //2. Verify header if needs
+        assertThat(response.header("Content-Type"), equalTo("application/json; charset=utf-8"));
+        assertThat(response.header("X-Powered-By"), equalTo("Express"));
+        //3. Verify body
+        assertThat(countryFirstPage.getData().size(), equalTo(size));
+    }
+
+    private static Response getCountries(int page, int size) {
+        return RestAssured.given().log().all()
+                .queryParams("page", page)
+                .queryParams("size", size)
+                .get("/api/v4/countries");
     }
 }
