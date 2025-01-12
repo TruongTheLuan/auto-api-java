@@ -1,9 +1,10 @@
-package country;
+package tests.country;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import utils.RestAssuredUtils;
 
 import static data.country.GetCountryWithGdpData.GET_ALL_COUNTRIES_WITH_GDP;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
@@ -15,8 +16,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class GetCountryWithGdpTests {
     @BeforeAll
     static void setUp(){
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 3000;
+        RestAssuredUtils.setUp();
     }
     @Test
     void verifyGetCountryWithGdpApiSchema(){

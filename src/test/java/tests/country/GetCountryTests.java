@@ -1,4 +1,4 @@
-package country;
+package tests.country;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import utils.RestAssuredUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,7 @@ public class GetCountryTests {
 
     @BeforeAll
     static void setUp(){
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 3000;
+        RestAssuredUtils.setUp();
     }
 
     @Test
