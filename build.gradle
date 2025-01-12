@@ -18,6 +18,8 @@ dependencies {
     testImplementation 'io.rest-assured:json-schema-validator:5.5.0'
     testImplementation 'net.javacrumbs.json-unit:json-unit:4.1.0'
     testImplementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
+    testCompileOnly 'org.projectlombok:lombok:1.18.36'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 }
 
 test {

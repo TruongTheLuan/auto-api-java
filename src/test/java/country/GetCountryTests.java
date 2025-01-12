@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static data.country.GetCountryData.GET_ALL_COUNTRIES;
+import static data.country.GetCountryWithPrivateKeyData.GET_ALL_COUNTRIES_WITH_PRIVATE_KEY;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER;
@@ -158,5 +159,22 @@ public class GetCountryTests {
                 .queryParams("page", page)
                 .queryParams("size", size)
                 .get("/api/v4/countries");
+    }
+
+    @Test
+    void verifyGetCountryApiWithPrivateKey(){
+        Response response = RestAssured.given().log().all()
+                .header("api-key", "private")
+                .get("/api/v5/countries");
+        //1. Verify status code
+        assertThat(response.statusCode(), equalTo(200));
+        //2. Verify header if needs
+        assertThat(response.header("Content-Type"), equalTo("application/json; charset=utf-8"));
+        assertThat(response.header("X-Powered-By"), equalTo("Express"));
+        //3. Verify body
+        //3.1 Verify schema -> Do it in a separate TC
+        //3.2 Verify response
+        assertThat(response.asString(), jsonEquals(GET_ALL_COUNTRIES_WITH_PRIVATE_KEY).when(IGNORING_ARRAY_ORDER));
+
     }
 }
