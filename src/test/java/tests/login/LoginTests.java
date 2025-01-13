@@ -61,8 +61,11 @@ public class LoginTests {
                 .body(loginRequest)
                 .post("/api/login");
         SoftAssertions softAssertions = new SoftAssertions();
-        //1. Verify status codeisn; charset=utf-8"));
-        assertThat(response.header("X-Powered-By"), equalTo("Express"));
+        //1. Verify status code
+        softAssertions.assertThat(response.statusCode()).isEqualTo(401);
+        //2. Verify header if needs
+        softAssertions.assertThat(response.header("Content-Type")).isEqualTo("application/json; charset=utf-8");
+        softAssertions.assertThat(response.header("X-Powered-By")).isEqualTo("Express");
         //3. Verify body
         LoginFailResponse loginFailResponse = response.as(LoginFailResponse.class);
         softAssertions.assertThat(loginFailResponse.getMessage()).isEqualTo("Invalid credentials");
