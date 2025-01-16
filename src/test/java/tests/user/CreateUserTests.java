@@ -3,11 +3,7 @@ package tests.user;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import lombok.extern.java.Log;
-import model.login.LoginFailResponse;
-import model.login.LoginRequest;
-import model.login.LoginResponse;
-import model.user.*;
+import model.dto.user.*;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -85,6 +81,7 @@ public class CreateUserTests {
         verifyDateTime(softAssertions, getUserResponse.getCreatedAt(),timeBeforeCreateUser, timeAfterCreateUser);
         verifyDateTime(softAssertions, getUserResponse.getUpdatedAt(),timeBeforeCreateUser, timeAfterCreateUser);
         softAssertions.assertAll();
+        //5. Verify by access to DB
     }
 
     void verifyDateTime(SoftAssertions softAssertions, String targetDateTime, LocalDateTime timeBefore, LocalDateTime timeAfter){

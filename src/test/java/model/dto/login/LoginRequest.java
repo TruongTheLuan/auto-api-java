@@ -1,10 +1,6 @@
-package model.login;
+package model.dto.login;
 
 import lombok.*;
-import model.user.UserAddressRequest;
-import model.user.UserRequest;
-
-import java.util.List;
 
 @Getter
 @Setter

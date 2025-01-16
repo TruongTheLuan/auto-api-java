@@ -1,4 +1,4 @@
-package model.user;
+package model.dto.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateUserResponse {
-    private String id;
-    private String message;
+public class LoginResponse {
+    private String token;
+    private String timeout;
 }
