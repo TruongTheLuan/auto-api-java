@@ -1,5 +1,6 @@
 package model.dao;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,7 +21,9 @@ public class CustomerDao {
     private String birthday;
     private String phone;
     private String email;
+    @JsonIgnore
     private LocalDateTime createdAt;
+    @JsonIgnore
     private LocalDateTime updatedAt;
     @OneToMany(mappedBy = "customerId", cascade = CascadeType.ALL)
     private List<CustomerAddressDao> addresses;

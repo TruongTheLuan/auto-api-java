@@ -1,5 +1,6 @@
 package model.dao;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -23,6 +24,8 @@ public class CustomerAddressDao {
     private String state;
     private String zip;
     private String country;
+    @JsonIgnore
     private LocalDateTime createdAt;
+    @JsonIgnore
     private LocalDateTime updatedAt;
 }

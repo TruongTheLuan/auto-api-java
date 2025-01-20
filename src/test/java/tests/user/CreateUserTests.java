@@ -3,12 +3,15 @@ package tests.user;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import model.dao.CustomerAddressDao;
+import model.dao.CustomerDao;
 import model.dto.user.*;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import utils.DbUtils;
 import utils.LoginUtils;
 import utils.RestAssuredUtils;
 
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 
@@ -46,6 +50,7 @@ public class CreateUserTests {
         UserRequest userRequest = UserRequest.getDefault();
         userRequest.setEmail(randomEmail);
         LocalDateTime timeBeforeCreateUser = LocalDateTime.now(ZoneId.of("Z"));
+        LocalDateTime timeBeforeCreateUserForDb = LocalDateTime.now();
         Response response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header(HEADER_AUTHORIZATION, token)
@@ -73,6 +78,7 @@ public class CreateUserTests {
         softAssertions = new SoftAssertions();
         softAssertions.assertThat(getUserResponse.getId()).isEqualTo(createUserResponse.getId());
         LocalDateTime timeAfterCreateUser = LocalDateTime.now(ZoneId.of("Z"));
+        LocalDateTime timeAfterCreateUserForDb = LocalDateTime.now();
         for (GetUserAddressResponse addressResponse : getUserResponse.getAddresses()){
             softAssertions.assertThat(addressResponse.getCustomerId()).isEqualTo(createUserResponse.getId());
             verifyDateTime(softAssertions, addressResponse.getCreatedAt(),timeBeforeCreateUser, timeAfterCreateUser);
@@ -82,12 +88,30 @@ public class CreateUserTests {
         verifyDateTime(softAssertions, getUserResponse.getUpdatedAt(),timeBeforeCreateUser, timeAfterCreateUser);
         softAssertions.assertAll();
         //5. Verify by access to DB
+        CustomerDao customerDao = DbUtils.getCustomerFromDb(createUserResponse.getId());
+        assertThatJson(customerDao).whenIgnoringPaths("$..id", "$..createdAt", "$..updatedAt", "$..customerId").isEqualTo(userRequest);
+        softAssertions = new SoftAssertions();
+        softAssertions.assertThat(UUID.fromString(getUserResponse.getId())).isEqualTo(customerDao.getId());
+
+        for (CustomerAddressDao address : customerDao.getAddresses()){
+            softAssertions.assertThat(address.getCustomerId()).isEqualTo(UUID.fromString(createUserResponse.getId()));
+            verifyDateTimeDb(softAssertions, address.getCreatedAt(),timeBeforeCreateUserForDb, timeAfterCreateUserForDb);
+            verifyDateTimeDb(softAssertions, address.getUpdatedAt(),timeBeforeCreateUserForDb, timeAfterCreateUserForDb);
+        }
+        verifyDateTimeDb(softAssertions, customerDao.getCreatedAt(),timeBeforeCreateUserForDb, timeAfterCreateUserForDb);
+        verifyDateTimeDb(softAssertions, customerDao.getUpdatedAt(),timeBeforeCreateUserForDb, timeAfterCreateUserForDb);
+        softAssertions.assertAll();
     }
 
     void verifyDateTime(SoftAssertions softAssertions, String targetDateTime, LocalDateTime timeBefore, LocalDateTime timeAfter){
         LocalDateTime userUpdatedAt = LocalDateTime.parse(targetDateTime, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
         softAssertions.assertThat(userUpdatedAt.isAfter(timeBefore)).isTrue();
         softAssertions.assertThat(userUpdatedAt.isBefore(timeAfter)).isTrue();
+    }
+
+    void verifyDateTimeDb(SoftAssertions softAssertions, LocalDateTime targetDateTime, LocalDateTime timeBefore, LocalDateTime timeAfter){
+        softAssertions.assertThat(targetDateTime.isAfter(timeBefore)).isTrue();
+        softAssertions.assertThat(targetDateTime.isBefore(timeAfter)).isTrue();
     }
 
     @Test
