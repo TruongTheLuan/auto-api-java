@@ -8,9 +8,7 @@ import model.dao.CustomerDao;
 import model.dto.user.*;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import utils.DbUtils;
 import utils.LoginUtils;
 import utils.RestAssuredUtils;
@@ -18,6 +16,7 @@ import utils.RestAssuredUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,12 +26,14 @@ public class CreateUserTests {
     static String token;
     static final String CREATE_USER_API = "/api/user";
     static final String GET_USER_API = "/api/user/%s";
+    static final String DELETE_USER_API = "/api/user/%s";
     static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     static final String HEADER_AUTHORIZATION = "Authorization";
     static final String HEADER_CONTENT_TYPE = "Content-Type";
     static final String CONTENT_TYPE = "application/json; charset=utf-8";
     static final String HEADER_POWER_BY = "X-Powered-By";
     static final String POWER_BY = "Express";
+    static List<String> createdCustomerIds = new ArrayList<>();
     @BeforeAll
     static void setUp(){
         RestAssuredUtils.setUp();
@@ -41,6 +42,15 @@ public class CreateUserTests {
     @BeforeEach
     void beforeEach(){
         token = LoginUtils.getToken();
+    }
+
+    @AfterAll
+    static void afterAll(){
+        for(String id : createdCustomerIds){
+            RestAssured.given().log().all()
+                    .header(HEADER_AUTHORIZATION, token)
+                    .delete(String.format(DELETE_USER_API,id));
+        }
     }
 
     @Test
@@ -64,6 +74,7 @@ public class CreateUserTests {
         softAssertions.assertThat(response.header(HEADER_POWER_BY)).isEqualTo(POWER_BY);
         //3. Verify body
         CreateUserResponse createUserResponse = response.as(CreateUserResponse.class);
+        createdCustomerIds.add(createUserResponse.getId());
         softAssertions.assertThat(StringUtils.isNoneBlank(createUserResponse.getId())).isTrue();
         softAssertions.assertThat(createUserResponse.getMessage()).isEqualTo("Customer created");
 
@@ -137,6 +148,7 @@ public class CreateUserTests {
         softAssertions.assertThat(response.header(HEADER_POWER_BY)).isEqualTo(POWER_BY);
         //3. Verify body
         CreateUserResponse createUserResponse = response.as(CreateUserResponse.class);
+        createdCustomerIds.add(createUserResponse.getId());
         softAssertions.assertThat(StringUtils.isNoneBlank(createUserResponse.getId())).isTrue();
         softAssertions.assertThat(createUserResponse.getMessage()).isEqualTo("Customer created");
         softAssertions.assertAll();
