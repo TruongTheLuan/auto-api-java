@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tests.TestMaster;
 import utils.DbUtils;
 import utils.LoginUtils;
 import utils.RestAssuredUtils;
@@ -28,29 +29,7 @@ import static utils.ConstantUtils.*;
 import static utils.DateTimeUtils.verifyDateTime;
 import static utils.DateTimeUtils.verifyDateTimeDb;
 
-public class UpdateUserTests {
-    static String token;
-
-    static List<String> createdCustomerIds = new ArrayList<>();
-    @BeforeAll
-    static void setUp(){
-        RestAssuredUtils.setUp();
-    }
-
-    @BeforeEach
-    void beforeEach(){
-        token = LoginUtils.getToken();
-    }
-
-    @AfterAll
-    static void afterAll(){
-        for(String id : createdCustomerIds){
-            RestAssured.given().log().all()
-                    .header(HEADER_AUTHORIZATION, token)
-                    .delete(String.format(DELETE_USER_API,id));
-        }
-    }
-
+public class UpdateUserTests extends TestMaster {
     @Test
     void verifyUpdateUserSuccessful(){
         //1. Prepare data

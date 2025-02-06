@@ -9,6 +9,7 @@ import model.dto.user.*;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
+import tests.TestMaster;
 import utils.DbUtils;
 import utils.LoginUtils;
 import utils.RestAssuredUtils;
@@ -25,28 +26,7 @@ import static utils.ConstantUtils.*;
 import static utils.DateTimeUtils.verifyDateTime;
 import static utils.DateTimeUtils.verifyDateTimeDb;
 
-public class CreateUserTests {
-    static String token;
-    static List<String> createdCustomerIds = new ArrayList<>();
-    @BeforeAll
-    static void setUp(){
-        RestAssuredUtils.setUp();
-    }
-
-    @BeforeEach
-    void beforeEach(){
-        token = LoginUtils.getToken();
-    }
-
-    @AfterAll
-    static void afterAll(){
-        for(String id : createdCustomerIds){
-            RestAssured.given().log().all()
-                    .header(HEADER_AUTHORIZATION, token)
-                    .delete(String.format(DELETE_USER_API,id));
-        }
-    }
-
+public class CreateUserTests extends TestMaster {
     @Test
     void verifyCreateUserSuccessfull(){
         long randomNumber = System.currentTimeMillis();
