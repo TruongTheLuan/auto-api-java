@@ -29,4 +29,16 @@ public class UserRequest {
                 .addresses(List.of(UserAddressRequest.getDefault()))
                 .build();
     }
+
+    public static UserRequest getUpdateUserInformation(){
+        return UserRequest.builder()
+                .firstName("Jose")
+                .lastName("Does")
+                .middleName("Smiths")
+                .birthday("01-23-2001")
+                .email("auto_api@abc.com")
+                .phone("0123456788")
+                .addresses(List.of(UserAddressRequest.getDefault()))
+                .build();
+    }
 }

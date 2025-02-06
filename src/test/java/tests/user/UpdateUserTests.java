@@ -6,8 +6,6 @@ import io.restassured.response.Response;
 import model.dao.CustomerAddressDao;
 import model.dao.CustomerDao;
 import model.dto.user.*;
-import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.AbstractBigDecimalAssert;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -77,32 +75,32 @@ public class UpdateUserTests {
         CreateUserResponse createUserResponse = response.as(CreateUserResponse.class);
         createdCustomerIds.add(createUserResponse.getId());
         //2. Perform updating
-        UserRequest updateUserRequest = UserRequest.updateUserInformation();
+        UserRequest updateUserRequest = UserRequest.getUpdateUserInformation();
         updateUserRequest.setEmail(randomEmail);
         Response updateResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header(HEADER_AUTHORIZATION, token)
-                .body(userRequest)
-                .put(UPDATE_USER_API);
+                .body(updateUserRequest)
+                .put(String.format(UPDATE_USER_API, createUserResponse.getId()));
         SoftAssertions softAssertions = new SoftAssertions();
         //3. Verify status code
         softAssertions.assertThat(updateResponse.statusCode()).isEqualTo(200);
         //4. Verify header if needs
         softAssertions.assertThat(response.header(HEADER_CONTENT_TYPE)).isEqualTo(CONTENT_TYPE);
         softAssertions.assertThat(response.header(HEADER_POWER_BY)).isEqualTo(POWER_BY);
-        //4. Verify body
+        //5. Verify body
         UpdateUserResponse updateUserResponse = updateResponse.as(UpdateUserResponse.class);
         softAssertions.assertThat(updateUserResponse.getId()).isEqualTo(createUserResponse.getId());
-        softAssertions.assertThat(updateUserResponse.getMessage()).isEqualTo("User Updated");
+        softAssertions.assertThat(updateUserResponse.getMessage()).isEqualTo("Customer updated");
 
-        //5. Double Check that user has been stored in system
+        //6 Double Check that user has been stored in system
         Response getResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header(HEADER_AUTHORIZATION, token)
                 .get(String.format(GET_USER_API,createUserResponse.getId()));
         softAssertions.assertThat(getResponse.statusCode()).isEqualTo(200);
         GetUserResponse getUserResponse = getResponse.as(GetUserResponse.class);
-        assertThatJson(getUserResponse).whenIgnoringPaths("$..id", "$..createdAt", "$..updatedAt", "$..customerId").isEqualTo(userRequest);
+        assertThatJson(getUserResponse).whenIgnoringPaths("$..id", "$..createdAt", "$..updatedAt", "$..customerId").isEqualTo(updateUserRequest);
         softAssertions = new SoftAssertions();
         softAssertions.assertThat(getUserResponse.getId()).isEqualTo(createUserResponse.getId());
         LocalDateTime timeAfterCreateUser = LocalDateTime.now(ZoneId.of("Z"));
@@ -117,7 +115,7 @@ public class UpdateUserTests {
         softAssertions.assertAll();
         //6. Verify by access to DB
         CustomerDao customerDao = DbUtils.getCustomerFromDb(createUserResponse.getId());
-        assertThatJson(customerDao).whenIgnoringPaths("$..id", "$..createdAt", "$..updatedAt", "$..customerId").isEqualTo(userRequest);
+        assertThatJson(customerDao).whenIgnoringPaths("$..id", "$..createdAt", "$..updatedAt", "$..customerId").isEqualTo(updateUserRequest);
         softAssertions = new SoftAssertions();
         softAssertions.assertThat(UUID.fromString(getUserResponse.getId())).isEqualTo(customerDao.getId());
 
