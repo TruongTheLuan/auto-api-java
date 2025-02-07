@@ -12,7 +12,7 @@
         "bodyPatterns": [
           {
             "equalToJson": {
-              "id": "1615fd5f-0c8f-4069-88df-e7a2336f73ed",
+              "id": "${json-unit.any-string}",
               "name": "Doe John",
               "cardColor": "Silver",
               "textColor": "Black",
