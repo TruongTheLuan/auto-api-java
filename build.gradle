@@ -9,6 +9,19 @@ repositories {
     mavenCentral()
 }
 
+// Define the version of Allure you want to use via the allureVersion property
+def allureVersion = "2.24.0"
+// Define the version of AspectJ
+def aspectJVersion = "1.9.20.1"
+
+// Define configuration for AspectJ agent
+configurations {
+    agent {
+        canBeResolved = true
+        canBeConsumed = true
+    }
+}
+
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -27,8 +40,15 @@ dependencies {
     testImplementation "org.wiremock:wiremock:3.11.0"
     testImplementation "org.assertj:assertj-core:3.24.2"
     testImplementation 'io.github.cdimascio:dotenv-java:3.1.0'
+    // Import allure-bom to ensure correct versions of all the dependencies are used
+    testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
+    // Add necessary Allure dependencies to dependencies section
+    testImplementation "io.qameta.allure:allure-junit5"
+    // Add aspectjweaver dependency
+    agent "org.aspectj:aspectjweaver:$aspectJVersion"
 }
 
 test {
+    jvmArgs = [ "-javaagent:${configurations.agent.singleFile}" ]
     useJUnitPlatform()
 }
